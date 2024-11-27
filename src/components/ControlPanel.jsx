@@ -11,7 +11,7 @@ const ControlPanel = () => {
         <Square size={22} onClick={() => setSelectedTool('square')} weight={ selectedTool == 'square' ? 'fill' : 'light'} className='text-slate-800 cursor-pointer'/>
       </div>
       <div className='p-1 rounded hover:bg-slate-100'>
-        <Circle size={22} onClick={() => setSelectedTool('circle')} weight={ selectedTool == 'circle' ? 'fill' : 'light'} className='text-slate-800 cursor-pointer'/>
+        <Circle size={22} onClick={() => setSelectedTool('ellipse')} weight={ selectedTool == 'ellipse' ? 'fill' : 'light'} className='text-slate-800 cursor-pointer'/>
       </div>
       <div className='p-1 rounded hover:bg-slate-100'>
         <PencilSimple size={22} onClick={() => setSelectedTool('pencil')} weight={ selectedTool == 'pencil' ? 'fill' : 'light'} className='text-slate-800 cursor-pointer'/>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Stage, Layer, Line, Circle, Rect } from 'react-konva';
+import { Stage, Layer, Line, Ellipse, Rect, Circle } from 'react-konva';
 import { useStore } from '../store';
 
 import ControlPanel from './ControlPanel';
@@ -16,6 +16,9 @@ const App = () => {
 
   const [annotations, setAnnotations] = useState([]);
   const [newAnnotation, setNewAnnotation] = useState([]);
+
+  const [ellipses, setEllipses] = useState([]);
+  const [newEllipse, setNewEllipse] = useState([]);
 
   const selectedTool = useStore((state) => state.selectedTool);
 
@@ -62,6 +65,16 @@ const App = () => {
         setNewAnnotation([{ x: transformedPos.x, y: transformedPos.y, width: 0, height: 0, key: "0" }]);
       }
     }
+    if(selectedTool == 'ellipse'){
+      if (newEllipse.length === 0) {
+        const pos = stage.getPointerPosition();
+        const transformedPos = {
+          x: (pos.x - stageX) / stageScale,
+          y: (pos.y - stageY) / stageScale,
+        }
+        setNewEllipse([{ x: transformedPos.x, y: transformedPos.y, radiusX: 0, radiusY: 0, key: "0" }]);
+      }
+    }
   };
 
   const handleMouseMove = () => {
@@ -106,6 +119,27 @@ const App = () => {
         ]);
       }
     }
+
+    if(selectedTool == 'ellipse'){
+      if (newEllipse.length === 1) {
+        const sx = newEllipse[0].x;
+        const sy = newEllipse[0].y;
+        const pos = stage.getPointerPosition();
+        const transformedPos = {
+          x: (pos.x - stageX) / stageScale,
+          y: (pos.y - stageY) / stageScale,
+        };
+        setNewEllipse([
+          {
+            x: sx,
+            y: sy,
+            radiusX: transformedPos.x - sx,
+            radiusY: transformedPos.y - sy,
+            key: "0"
+          }
+        ]);
+      }
+    }
   };
 
   const handleMouseUp = () => {
@@ -130,6 +164,27 @@ const App = () => {
         annotations.push(annotationToAdd);
         setNewAnnotation([]);
         setAnnotations(annotations);
+      }
+    }
+    if(selectedTool == 'ellipse'){
+      if (newEllipse.length === 1) {
+        const sx = newEllipse[0].x;
+        const sy = newEllipse[0].y;
+        const pos = stage.getPointerPosition();
+        const transformedPos = {
+          x: (pos.x - stageX) / stageScale,
+          y: (pos.y - stageY) / stageScale,
+        };
+        const ellipseToAdd = {
+          x: sx,
+          y: sy,
+          radiusX: transformedPos.x - sx,
+          radiusY: transformedPos.y - sy,
+          key: ellipses.length + 1
+        };
+        ellipses.push(ellipseToAdd);
+        setNewEllipse([]);
+        setEllipses(ellipses);
       }
     }
   };
@@ -159,6 +214,7 @@ const App = () => {
   }, []);
 
   const annotationsToDraw = [...annotations, ...newAnnotation];
+  const ellipsesToDraw = [...ellipses, ...newEllipse];
 
   return (
     <div className='relative w-screen'>
@@ -182,14 +238,27 @@ const App = () => {
           {lines.map((line, i) => (
             <Line key={i} points={line.points} stroke="black" strokeWidth={2} tension={0.5} lineCap="round" />
           ))}
-          {annotationsToDraw.map((value, index) => {
+          {annotationsToDraw.map(value => {
             return (
               <Rect
-                key={index}
+                key={value.key}
                 x={value.x}
                 y={value.y}
                 width={value.width}
                 height={value.height}
+                fill="transparent"
+                stroke="black"
+              />
+            );
+          })}
+          {ellipsesToDraw.map(value => {
+            return (
+              <Ellipse
+                key={value.key}
+                x={value.x}
+                y={value.y}
+                radiusX={value.radiusX}
+                radiusY={value.radiusY}
                 fill="transparent"
                 stroke="black"
               />
