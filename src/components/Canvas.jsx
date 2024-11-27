@@ -54,8 +54,12 @@ const App = () => {
     }
     if (selectedTool == 'square'){
       if (newAnnotation.length === 0) {
-        const { x, y } = stage.getPointerPosition();
-        setNewAnnotation([{ x, y, width: 0, height: 0, key: "0" }]);
+        const pos = stage.getPointerPosition();
+        const transformedPos = {
+          x: (pos.x - stageX) / stageScale,
+          y: (pos.y - stageY) / stageScale,
+        }
+        setNewAnnotation([{ x: transformedPos.x, y: transformedPos.y, width: 0, height: 0, key: "0" }]);
       }
     }
   };
@@ -86,13 +90,17 @@ const App = () => {
       if (newAnnotation.length === 1) {
         const sx = newAnnotation[0].x;
         const sy = newAnnotation[0].y;
-        const { x, y } = stage.getPointerPosition();
+        const pos = stage.getPointerPosition();
+        const transformedPos = {
+          x: (pos.x - stageX) / stageScale,
+          y: (pos.y - stageY) / stageScale,
+        };
         setNewAnnotation([
           {
             x: sx,
             y: sy,
-            width: x - sx,
-            height: y - sy,
+            width: transformedPos.x - sx,
+            height: transformedPos.y - sy,
             key: "0"
           }
         ]);
@@ -107,12 +115,16 @@ const App = () => {
       if (newAnnotation.length === 1) {
         const sx = newAnnotation[0].x;
         const sy = newAnnotation[0].y;
-        const { x, y } = stage.getPointerPosition();
+        const pos = stage.getPointerPosition();
+        const transformedPos = {
+          x: (pos.x - stageX) / stageScale,
+          y: (pos.y - stageY) / stageScale,
+        };
         const annotationToAdd = {
           x: sx,
           y: sy,
-          width: x - sx,
-          height: y - sy,
+          width: transformedPos.x - sx,
+          height: transformedPos.y - sy,
           key: annotations.length + 1
         };
         annotations.push(annotationToAdd);
