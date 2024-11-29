@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useStore } from '../store';
 
 export const useCanvasPan = () => {
@@ -8,21 +8,21 @@ export const useCanvasPan = () => {
   const stage = useStore((state) => state.stage);
   const setStageX = useStore((state) => state.setStageX);
   const setStageY = useStore((state) => state.setStageY);
-  const lastDist = useStore((state) => state.lastDist);
-  const setLastDist = useStore((state) => state.setLastDist);
+
+  const lastDist = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = () => {
     if (isSpaceDown) {
       const pointerPosition = stage.getPointerPosition();
-      setLastDist({ x: pointerPosition.x - stage.x(), y: pointerPosition.y - stage.y() })
+      lastDist.current = ({ x: pointerPosition.x - stage.x(), y: pointerPosition.y - stage.y() })
     }
   };
 
   const handleMouseMove = () => {
     if (isSpaceDown) {
       const pointerPosition = stage.getPointerPosition();
-      setStageX(pointerPosition.x - lastDist.x);
-      setStageY(pointerPosition.y - lastDist.y);
+      setStageX(pointerPosition.x - lastDist.current.x);
+      setStageY(pointerPosition.y - lastDist.current.y);
     }
   };
 

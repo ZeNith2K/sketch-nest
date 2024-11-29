@@ -8,9 +8,6 @@ export const useStore = create((set) => ({
   selectedTool: null,
   isMouseDown: false,
   isSpaceDown: false,
-  lastDist : { x: 0, y: 0 },
-  rects: [],
-  newRect: [],
   setStage: (stage) => set({ stage }),
   setStageScale: (stageScale) => set({ stageScale }),
   setStageX: (stageX) => set({ stageX }),
@@ -18,8 +15,5 @@ export const useStore = create((set) => ({
   setSelectedTool: (tool) => set({ selectedTool: tool }),
   setIsMouseDown: (isMouseDown) => set({ isMouseDown }),
   setIsSpaceDown: (isSpaceDown) => set({ isSpaceDown }),
-  setLastDist: (lastDist) => set({ lastDist }),
-  setRects: (rects) => set({ rects }),
-  setNewRect: (newRect) => set({ newRect }),
 }))
 

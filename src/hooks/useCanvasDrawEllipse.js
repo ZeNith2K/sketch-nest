@@ -39,8 +39,8 @@ export const useCanvasDrawEllipse = () => {
         {
           x: sx,
           y: sy,
-          radiusX: transformedPos.x - sx,
-          radiusY: transformedPos.y - sy,
+          radiusX: Math.abs(transformedPos.x - sx),
+          radiusY: Math.abs(transformedPos.y - sy),
           key: "0"
         }
       ]);
@@ -60,8 +60,8 @@ export const useCanvasDrawEllipse = () => {
       const ellipseToAdd = {
         x: sx,
         y: sy,
-        radiusX: transformedPos.x - sx,
-        radiusY: transformedPos.y - sy,
+        radiusX: Math.abs(transformedPos.x - sx),
+        radiusY: Math.abs(transformedPos.y - sy),
         key: ellipses.length + 1
       };
       ellipses.push(ellipseToAdd);
