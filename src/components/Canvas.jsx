@@ -1,220 +1,59 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Stage, Layer, Line, Ellipse, Rect, Circle } from 'react-konva';
 import { useStore } from '../store';
+import { useCanvasZoom } from '../hooks/useCanvasZoom';
+import { useCanvasPan } from '../hooks/useCanvasPan';
+import { useCanvasDraw } from '../hooks/useCanvasDraw';
+import { useCanvasDrawRect } from '../hooks/useCanvasDrawRect';
+import { useCanvasDrawEllipse } from '../hooks/useCanvasDrawEllipse';
 
 import ControlPanel from './ControlPanel';
 
 const App = () => {
-  const [stageScale, setStageScale] = useState(1);
-  const [stageX, setStageX] = useState(0);
-  const [stageY, setStageY] = useState(0);
-  const [lines, setLines] = useState([]);
   const stageRef = useRef(null);
-  const isSpaceDown = useRef(false);
-  const isMouseDown = useRef(false);
-  const lastDist = useRef({ x: 0, y: 0 });
+  const isMouseDown = useStore((state) => state.isMouseDown);
+  const setIsMouseDown = useStore((state) => state.setIsMouseDown);
 
-  const [annotations, setAnnotations] = useState([]);
-  const [newAnnotation, setNewAnnotation] = useState([]);
+  const { handleWheel } = useCanvasZoom();
+  const { handleMouseDown: handlePanMouseDown, handleMouseMove: handlePanMouseMove } = useCanvasPan();
+  const { handleMouseDown: handleDrawMouseDown, handleMouseMove: handleDrawMouseMove, getLinesToDraw } = useCanvasDraw();
+  const { handleMouseDown: handleDrawRectMouseDown, handleMouseMove: handleDrawRectMouseMove, handleMouseUp: handleDrawRectMouseUp, getRectsToDraw } = useCanvasDrawRect();
+  const { handleMouseDown: handleDrawEllipseMouseDown, handleMouseMove: handleDrawEllipseMouseMove, handleMouseUp: handleDrawEllipseMouseUp, getEllipsesToDraw } = useCanvasDrawEllipse();
 
-  const [ellipses, setEllipses] = useState([]);
-  const [newEllipse, setNewEllipse] = useState([]);
+  const stageScale = useStore((state) => state.stageScale);
+  const stageX = useStore((state) => state.stageX);
+  const stageY = useStore((state) => state.stageY);
+  const setStage = useStore((state) => state.setStage);
 
-  const selectedTool = useStore((state) => state.selectedTool);
-
-  const handleWheel = (e) => {
-    e.evt.preventDefault();
-    const scaleBy = 1.05;
-    const stage = stageRef.current;
-    const oldScale = stage.scaleX();
-    const mousePointTo = {
-      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
-      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
-    };
-
-    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-    setStageScale(newScale);
-    setStageX(-(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale);
-    setStageY(-(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale);
-  };
+  useEffect(() => {
+    setStage(stageRef.current);
+  },[stageRef, setStage])
 
   const handleMouseDown = () => {
-    if(!selectedTool && !isSpaceDown.current) return;
-    isMouseDown.current = true;
-    const stage = stageRef.current;
-    if (isSpaceDown.current) {
-      const pointerPosition = stage.getPointerPosition();
-      lastDist.current = { x: pointerPosition.x - stage.x(), y: pointerPosition.y - stage.y() };
-      return;
-    }
-    if (selectedTool == 'pencil'){
-      const pos = stage.getPointerPosition();
-      const transformedPos = {
-        x: (pos.x - stageX) / stageScale,
-        y: (pos.y - stageY) / stageScale,
-      };
-      setLines([...lines, { points: [transformedPos.x, transformedPos.y] }]);
-    }
-    if (selectedTool == 'square'){
-      if (newAnnotation.length === 0) {
-        const pos = stage.getPointerPosition();
-        const transformedPos = {
-          x: (pos.x - stageX) / stageScale,
-          y: (pos.y - stageY) / stageScale,
-        }
-        setNewAnnotation([{ x: transformedPos.x, y: transformedPos.y, width: 0, height: 0, key: "0" }]);
-      }
-    }
-    if(selectedTool == 'ellipse'){
-      if (newEllipse.length === 0) {
-        const pos = stage.getPointerPosition();
-        const transformedPos = {
-          x: (pos.x - stageX) / stageScale,
-          y: (pos.y - stageY) / stageScale,
-        }
-        setNewEllipse([{ x: transformedPos.x, y: transformedPos.y, radiusX: 0, radiusY: 0, key: "0" }]);
-      }
-    }
+    setIsMouseDown(true);
+    handlePanMouseDown();
+    handleDrawMouseDown();
+    handleDrawRectMouseDown();
+    handleDrawEllipseMouseDown();
   };
 
   const handleMouseMove = () => {
-    if(!isMouseDown.current) return
-    const stage = stageRef.current;
-    if (isSpaceDown.current) {
-      const pointerPosition = stage.getPointerPosition();
-      setStageX(pointerPosition.x - lastDist.current.x);
-      setStageY(pointerPosition.y - lastDist.current.y);
-      return;
-    }
-    if (selectedTool == 'pencil'){
-      const point = stage.getPointerPosition();
-      const transformedPoint = {
-        x: (point.x - stageX) / stageScale,
-        y: (point.y - stageY) / stageScale,
-      };
-      let lastLine = lines[lines.length - 1];
-      lastLine.points = lastLine.points.concat([transformedPoint.x, transformedPoint.y]);
-
-      lines.splice(lines.length - 1, 1, lastLine);
-      setLines(lines.concat());
-    }
-
-    if(selectedTool == 'square'){
-      if (newAnnotation.length === 1) {
-        const sx = newAnnotation[0].x;
-        const sy = newAnnotation[0].y;
-        const pos = stage.getPointerPosition();
-        const transformedPos = {
-          x: (pos.x - stageX) / stageScale,
-          y: (pos.y - stageY) / stageScale,
-        };
-        setNewAnnotation([
-          {
-            x: sx,
-            y: sy,
-            width: transformedPos.x - sx,
-            height: transformedPos.y - sy,
-            key: "0"
-          }
-        ]);
-      }
-    }
-
-    if(selectedTool == 'ellipse'){
-      if (newEllipse.length === 1) {
-        const sx = newEllipse[0].x;
-        const sy = newEllipse[0].y;
-        const pos = stage.getPointerPosition();
-        const transformedPos = {
-          x: (pos.x - stageX) / stageScale,
-          y: (pos.y - stageY) / stageScale,
-        };
-        setNewEllipse([
-          {
-            x: sx,
-            y: sy,
-            radiusX: transformedPos.x - sx,
-            radiusY: transformedPos.y - sy,
-            key: "0"
-          }
-        ]);
-      }
-    }
+    if(!isMouseDown) return
+    handlePanMouseMove()
+    handleDrawMouseMove()
+    handleDrawRectMouseMove()
+    handleDrawEllipseMouseMove()
   };
 
   const handleMouseUp = () => {
-    isMouseDown.current = false;
-    const stage = stageRef.current
-    if (selectedTool == 'square'){
-      if (newAnnotation.length === 1) {
-        const sx = newAnnotation[0].x;
-        const sy = newAnnotation[0].y;
-        const pos = stage.getPointerPosition();
-        const transformedPos = {
-          x: (pos.x - stageX) / stageScale,
-          y: (pos.y - stageY) / stageScale,
-        };
-        const annotationToAdd = {
-          x: sx,
-          y: sy,
-          width: transformedPos.x - sx,
-          height: transformedPos.y - sy,
-          key: annotations.length + 1
-        };
-        annotations.push(annotationToAdd);
-        setNewAnnotation([]);
-        setAnnotations(annotations);
-      }
-    }
-    if(selectedTool == 'ellipse'){
-      if (newEllipse.length === 1) {
-        const sx = newEllipse[0].x;
-        const sy = newEllipse[0].y;
-        const pos = stage.getPointerPosition();
-        const transformedPos = {
-          x: (pos.x - stageX) / stageScale,
-          y: (pos.y - stageY) / stageScale,
-        };
-        const ellipseToAdd = {
-          x: sx,
-          y: sy,
-          radiusX: transformedPos.x - sx,
-          radiusY: transformedPos.y - sy,
-          key: ellipses.length + 1
-        };
-        ellipses.push(ellipseToAdd);
-        setNewEllipse([]);
-        setEllipses(ellipses);
-      }
-    }
+    setIsMouseDown(false)
+    handleDrawRectMouseUp()
+    handleDrawEllipseMouseUp()
   };
 
-  const handleKeyDown = (e) => {
-    if (e.code === 'Space') {
-      isSpaceDown.current = true;
-      stageRef.current.container().style.cursor = 'grab';
-    }
-  };
-
-  const handleKeyUp = (e) => {
-    if (e.code === 'Space') {
-      isSpaceDown.current = false;
-      stageRef.current.container().style.cursor = 'default';
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-
-  const annotationsToDraw = [...annotations, ...newAnnotation];
-  const ellipsesToDraw = [...ellipses, ...newEllipse];
+  const lines = getLinesToDraw();
+  const rectsToDraw = getRectsToDraw();
+  const ellipsesToDraw = getEllipsesToDraw();
 
   return (
     <div className='relative w-screen'>
@@ -238,7 +77,7 @@ const App = () => {
           {lines.map((line, i) => (
             <Line key={i} points={line.points} stroke="black" strokeWidth={2} tension={0.5} lineCap="round" />
           ))}
-          {annotationsToDraw.map(value => {
+          {rectsToDraw.map(value => {
             return (
               <Rect
                 key={value.key}
