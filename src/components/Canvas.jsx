@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Stage, Layer, Line, Ellipse, Rect, Circle } from 'react-konva';
 import { useStore } from '../store';
 import { useCanvasZoom } from '../hooks/useCanvasZoom';
+import { useCustomCursor } from '../hooks/useCustomCursor';
 import { useCanvasPan } from '../hooks/useCanvasPan';
 import { useCanvasDraw } from '../hooks/useCanvasDraw';
 import { useCanvasDrawRect } from '../hooks/useCanvasDrawRect';
@@ -15,15 +16,49 @@ const App = () => {
   const setIsMouseDown = useStore((state) => state.setIsMouseDown);
 
   const { handleWheel } = useCanvasZoom();
+  const { addCustomCursor, removeCustomCursor } = useCustomCursor();
   const { handleMouseDown: handlePanMouseDown, handleMouseMove: handlePanMouseMove } = useCanvasPan();
-  const { handleMouseDown: handleDrawMouseDown, handleMouseMove: handleDrawMouseMove, getLinesToDraw } = useCanvasDraw();
-  const { handleMouseDown: handleDrawRectMouseDown, handleMouseMove: handleDrawRectMouseMove, handleMouseUp: handleDrawRectMouseUp, getRectsToDraw } = useCanvasDrawRect();
-  const { handleMouseDown: handleDrawEllipseMouseDown, handleMouseMove: handleDrawEllipseMouseMove, handleMouseUp: handleDrawEllipseMouseUp, getEllipsesToDraw } = useCanvasDrawEllipse();
+  const { handleMouseDown: handleDrawMouseDown, handleMouseMove: handleDrawMouseMove, handleMouseUp: handleDrawMouseUp } = useCanvasDraw();
+  const { handleMouseDown: handleDrawRectMouseDown, handleMouseMove: handleDrawRectMouseMove, handleMouseUp: handleDrawRectMouseUp } = useCanvasDrawRect();
+  const { handleMouseDown: handleDrawEllipseMouseDown, handleMouseMove: handleDrawEllipseMouseMove, handleMouseUp: handleDrawEllipseMouseUp } = useCanvasDrawEllipse();
 
   const stageScale = useStore((state) => state.stageScale);
   const stageX = useStore((state) => state.stageX);
   const stageY = useStore((state) => state.stageY);
   const setStage = useStore((state) => state.setStage);
+  const lines = useStore((state) => state.lines);
+  const rects = useStore((state) => state.rects);
+  const ellipses = useStore((state) => state.ellipses);
+  const setLines = useStore((state) => state.setLines);
+  const setRects = useStore((state) => state.setRects);
+  const setEllipses = useStore((state) => state.setEllipses);
+  const selectedTool = useStore((state) => state.selectedTool);
+
+  const removeElements = () => {
+    if(selectedTool !== 'eraser') return
+    const mousePos = stageRef.current.getPointerPosition();
+    const e = stageRef.current.getIntersection(mousePos)
+    if(!e) return
+    let shapeId = e.attrs.id;
+    var shape = stageRef.current.find(`#${shapeId}`)[0];
+
+    if(!shape) return
+    if (shape.className === 'Line') {
+      const filteredLines = lines.filter(line => line.id !== shapeId);
+      setLines(filteredLines);
+    } else if (shape.className === 'Rect') {
+      const filteredRects = rects.filter(rect => rect.id !== shapeId);
+      setRects(filteredRects);
+    } else if (shape.className === 'Ellipse') {
+      const filteredEllipses = ellipses.filter(ellipse => ellipse.id !== shapeId);
+      setEllipses(filteredEllipses);
+    }
+  }
+
+  useEffect(() => {
+    addCustomCursor();
+    return () => removeCustomCursor()
+  },[addCustomCursor, removeCustomCursor])
 
   useEffect(() => {
     setStage(stageRef.current);
@@ -38,6 +73,7 @@ const App = () => {
   };
 
   const handleMouseMove = () => {
+    removeElements()
     if(!isMouseDown) return
     handlePanMouseMove()
     handleDrawMouseMove()
@@ -47,16 +83,13 @@ const App = () => {
 
   const handleMouseUp = () => {
     setIsMouseDown(false)
+    handleDrawMouseUp()
     handleDrawRectMouseUp()
     handleDrawEllipseMouseUp()
   };
 
-  const lines = getLinesToDraw();
-  const rectsToDraw = getRectsToDraw();
-  const ellipsesToDraw = getEllipsesToDraw();
-
   return (
-    <div className='relative w-screen'>
+    <div className="relative w-screen">
       <ControlPanel />
       <Stage
         width={window.innerWidth}
@@ -74,30 +107,32 @@ const App = () => {
       >
         <Layer>
           <Circle fill="red" x={400} y={400} radius={100} />
-          {lines.map((line, i) => (
-            <Line key={i} points={line.points} stroke="black" strokeWidth={2} tension={0.5} lineCap="round" />
+          {lines.map(line => (
+            <Line key={line.id} id={line.id} points={line.points} stroke="black" strokeWidth={2} tension={0.5} lineCap="round" />
           ))}
-          {rectsToDraw.map(value => {
+          {rects.map(rect => {
             return (
               <Rect
-                key={value.key}
-                x={value.x}
-                y={value.y}
-                width={value.width}
-                height={value.height}
+                key={rect.id}
+                id={rect.id}
+                x={rect.x}
+                y={rect.y}
+                width={rect.width}
+                height={rect.height}
                 fill="transparent"
                 stroke="black"
               />
             );
           })}
-          {ellipsesToDraw.map(value => {
+          {ellipses.map(ellipse => {
             return (
               <Ellipse
-                key={value.key}
-                x={value.x}
-                y={value.y}
-                radiusX={value.radiusX}
-                radiusY={value.radiusY}
+                key={ellipse.id}
+                id={ellipse.id}
+                x={ellipse.x}
+                y={ellipse.y}
+                radiusX={ellipse.radiusX}
+                radiusY={ellipse.radiusY}
                 fill="transparent"
                 stroke="black"
               />
@@ -105,6 +140,7 @@ const App = () => {
           })}
         </Layer>
       </Stage>
+      <div id="circle" className="box"></div>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useStore } from '../store';
 
 export const useCanvasDraw = () => {
@@ -10,8 +9,9 @@ export const useCanvasDraw = () => {
   const selectedTool = useStore((state) => state.selectedTool);
   const isMouseDown = useStore((state) => state.isMouseDown);
   const isSpaceDown = useStore((state) => state.isSpaceDown);
-
-  const [lines, setLines] = useState([]);
+  const lines = useStore((state) => state.lines);
+  const setLines = useStore((state) => state.setLines);
+  const addHistory = useStore((state) => state.addHistory);
 
   const handleMouseDown = () => {
     if (selectedTool != 'pencil' || isSpaceDown) return
@@ -20,7 +20,7 @@ export const useCanvasDraw = () => {
       x: (pos.x - stageX) / stageScale,
       y: (pos.y - stageY) / stageScale,
     };
-    setLines([...lines, { points: [transformedPos.x, transformedPos.y] }]);
+    setLines([...lines, { points: [transformedPos.x, transformedPos.y], id: `line-${lines.length + 1}` }]);
   };
 
   const handleMouseMove = () => {
@@ -37,9 +37,11 @@ export const useCanvasDraw = () => {
     setLines(lines.concat());
   };
 
-  const getLinesToDraw = () => {
-    return lines
-  };
+  const handleMouseUp = () => {
+    if(selectedTool != 'pencil' || isSpaceDown) return
+    addHistory({ lines: lines.concat() });
+  }
 
-  return { handleMouseDown, handleMouseMove, getLinesToDraw };
+
+  return { handleMouseDown, handleMouseMove, handleMouseUp };
 };

@@ -18,3 +18,20 @@ body {
   min-width: 100vw;
   min-height: 100vh;
 }
+
+#circle {
+  position: fixed;
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  transition:
+    background ease-in 10ms,
+    box-shadow ease-in 150ms,
+    transform ease-in 150ms;
+  /* promote it to its own layer to enable  hardware accelerated rendering: */
+  transform: translate3d(0, 0, 0);
+}
+

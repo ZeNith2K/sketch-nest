@@ -9,8 +9,10 @@ export const useCanvasDrawRect = () => {
   const stageScale = useStore((state) => state.stageScale);
   const selectedTool = useStore((state) => state.selectedTool);
   const isSpaceDown = useStore((state) => state.isSpaceDown);
+  const rects = useStore((state) => state.rects);
+  const setRects = useStore((state) => state.setRects);
+  const addHistory = useStore((state) => state.addHistory);
 
-  const [rects, setRects ] = useState([]);
   const [newRect, setNewRect] = useState([]);
 
   const handleMouseDown = () => {
@@ -21,7 +23,9 @@ export const useCanvasDrawRect = () => {
         x: (pos.x - stageX) / stageScale,
         y: (pos.y - stageY) / stageScale,
       }
-      setNewRect([{ x: transformedPos.x, y: transformedPos.y, width: 0, height: 0, key: "0" }]);
+      const rect = { x: transformedPos.x, y: transformedPos.y, width: 0, height: 0, id: `rect-${rects.length + 1}` };
+      setNewRect([rect]);
+      setRects([...rects, rect]);
     }
   }
 
@@ -30,40 +34,23 @@ export const useCanvasDrawRect = () => {
     if (newRect.length === 1) {
       const sx = newRect[0].x;
       const sy = newRect[0].y;
+      const id = newRect[0].id;
       const pos = stage.getPointerPosition();
       const transformedPos = {
         x: (pos.x - stageX) / stageScale,
         y: (pos.y - stageY) / stageScale,
       };
-      setNewRect([{ x: sx, y: sy, width: transformedPos.x - sx, height: transformedPos.y - sy, key: "0" }]);
+      const updatedRect = { x: sx, y: sy, width: transformedPos.x - sx, height: transformedPos.y - sy, id };
+      setNewRect([updatedRect]);
+      setRects([...rects.slice(0, -1), updatedRect]);
     }
   }
 
   const handleMouseUp = () => {
     if(selectedTool != 'square' || isSpaceDown) return
-    if (newRect.length === 1) {
-      const sx = newRect[0].x;
-      const sy = newRect[0].y;
-      const pos = stage.getPointerPosition();
-      const transformedPos = {
-        x: (pos.x - stageX) / stageScale,
-        y: (pos.y - stageY) / stageScale,
-      };
-      const rectToAdd = {
-        x: sx,
-        y: sy,
-        width: transformedPos.x - sx,
-        height: transformedPos.y - sy,
-        key: rects.length + 1
-      };
-      setNewRect([]);
-      setRects([...rects, rectToAdd]);
-    }
+    setNewRect([]);
+    addHistory({ rects: rects.concat() });
   }
 
-  const getRectsToDraw = () => {
-    return [...rects, ...newRect]
-  }
-
-  return { handleMouseDown, handleMouseMove, handleMouseUp, getRectsToDraw };
+  return { handleMouseDown, handleMouseMove, handleMouseUp };
 }
