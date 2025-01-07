@@ -1,4 +1,4 @@
-import { Square, Circle, PencilSimple, Eraser } from '@phosphor-icons/react'
+import { Square, Circle, PencilSimple, Eraser, HandPalm, Selection } from '@phosphor-icons/react'
 import { useStore } from '../store'
 
 const ControlPanel = () => {
@@ -13,6 +13,9 @@ const ControlPanel = () => {
 
   return (
     <div className="border shadow rounded-md py-2 px-5 absolute top-10 left-0 right-0 m-auto w-[60vw] z-10 bg-white flex items-center justify-start gap-5">
+      <div className={`p-2 rounded hover:bg-slate-100 cursor-pointer ${checkSelectedTool('move') && 'bg-slate-200'}`}>
+        <HandPalm size={22} onClick={() => setSelectedTool('move')} weight={ selectedTool == 'move' ? 'fill' : 'light'} className='text-slate-800'/>
+      </div>
       <div className={`p-2 rounded hover:bg-slate-100 cursor-pointer ${checkSelectedTool('square') && 'bg-slate-200'}`}>
         <Square size={22} onClick={() => setSelectedTool('square')} weight={ selectedTool == 'square' ? 'fill' : 'light'} className='text-slate-800'/>
       </div>
@@ -24,6 +27,9 @@ const ControlPanel = () => {
       </div>
       <div className={`p-2 rounded hover:bg-slate-100 cursor-pointer ${checkSelectedTool('eraser') && 'bg-slate-200'}`}>
         <Eraser size={22} onClick={() => setSelectedTool('eraser')} weight={ selectedTool == 'eraser' ? 'fill' : 'light'} className='text-slate-800'/>
+      </div>
+      <div className={`p-2 rounded hover:bg-slate-100 cursor-pointer ${checkSelectedTool('selection') && 'bg-slate-200'}`}>
+        <Selection size={22} onClick={() => setSelectedTool('selection')} weight={ selectedTool == 'selection' ? 'fill' : 'light'} className='text-slate-800'/>
       </div>
       <button onClick={undo}>Undo</button>
       <button onClick={redo}>Redo</button>
