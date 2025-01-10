@@ -4,7 +4,6 @@ import { useStore } from '../store';
 const SelectionContainer = ({ x, y, width, height, onResize }) => {
 
   const stage = useStore((state) => state.stage);
-  const stageScale = useStore((state) => state.stageScale);
 
   const handleDragMove = (e, direction) => {
     const newPos = e.target.getStage().getPointerPosition();
@@ -20,28 +19,35 @@ const SelectionContainer = ({ x, y, width, height, onResize }) => {
 
   const handleMouseMove = (e) => {
     const rect = e.target;
-    const { x, y, width, height, strokeWidth } = rect.attrs;
-    const padding = (strokeWidth || 0) + (4 * stageScale);
+    const { x, y, width, height } = rect.attrs;
+    const offset = 8;
 
     const pointerPos = stage.getPointerPosition();
     const stageTransform = stage.getAbsoluteTransform().copy().invert();
     const transformedPointerPos = stageTransform.point(pointerPos);
 
-    const isInHorizontalStroke =
-      transformedPointerPos.x >= x - padding && transformedPointerPos.x <= x + width + padding;
-    const isInVerticalStroke =
-      transformedPointerPos.y >= y - padding && transformedPointerPos.y <= y + height + padding;
-    const isOnStroke =
-      (transformedPointerPos.x < x || transformedPointerPos.x > x + width) && isInVerticalStroke ||
-      (transformedPointerPos.y < y || transformedPointerPos.y > y + height) && isInHorizontalStroke;
+    const isOnLeftEdge = transformedPointerPos.x >= x - offset && transformedPointerPos.x <= x + offset;
+    const isOnRightEdge = transformedPointerPos.x >= x + width - offset && transformedPointerPos.x <= x + width + offset;
+    const isOnTopEdge = transformedPointerPos.y >= y - offset && transformedPointerPos.y <= y + offset;
+    const isOnBottomEdge = transformedPointerPos.y >= y + height - offset && transformedPointerPos.y <= y + height + offset;
 
-    if (isOnStroke) {
+    if (isOnLeftEdge && isOnTopEdge) {
+      stage.container().style.cursor = 'nw-resize';
+    } else if (isOnRightEdge && isOnTopEdge) {
+      stage.container().style.cursor = 'ne-resize';
+    } else if (isOnLeftEdge && isOnBottomEdge) {
+      stage.container().style.cursor = 'sw-resize';
+    } else if (isOnRightEdge && isOnBottomEdge) {
+      stage.container().style.cursor = 'se-resize';
+    } else if (isOnLeftEdge || isOnRightEdge) {
+      stage.container().style.cursor = 'ew-resize';
+    } else if (isOnTopEdge || isOnBottomEdge) {
       stage.container().style.cursor = 'ns-resize';
     } else if (
-      transformedPointerPos.x > x &&
-      transformedPointerPos.x < x + width &&
-      transformedPointerPos.y > y &&
-      transformedPointerPos.y < y + height
+      transformedPointerPos.x > x + offset &&
+      transformedPointerPos.x < x + width - offset &&
+      transformedPointerPos.y > y + offset &&
+      transformedPointerPos.y < y + height - offset
     ) {
       stage.container().style.cursor = 'move';
     } else {

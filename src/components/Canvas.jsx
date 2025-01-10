@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, Fragment } from 'react';
 import { Stage, Layer, Line, Ellipse, Rect, Circle } from 'react-konva';
 import { useStore } from '../store';
 import { useCanvasZoom } from '../hooks/useCanvasZoom';
@@ -120,7 +120,7 @@ const App = () => {
         <Layer>
           <Circle fill="red" x={400} y={400} radius={100} />
           {lines.map(line => (
-            <>
+            <Fragment key={`Fragment-${line.id}`}>
               <Line
                 key={line.id}
                 id={line.id}
@@ -140,10 +140,10 @@ const App = () => {
                   lineCap="round"
                 />
               )}
-            </>
+            </Fragment>
           ))}
           {rects.map(rect => (
-            <>
+            <Fragment key={`Fragment-${rect.id}`}>
               <Rect
                 key={rect.id}
                 id={rect.id}
@@ -163,10 +163,10 @@ const App = () => {
                   onResize={handleResize}
                 />
               )}
-            </>
+            </Fragment>
           ))}
           {ellipses.map(ellipse => (
-            <>
+            <Fragment key={`Fragment-${ellipse.id}`}>
               <Ellipse
                 key={ellipse.id}
                 id={ellipse.id}
@@ -186,7 +186,7 @@ const App = () => {
                   onResize={handleResize}
                 />
               )}
-            </>
+            </Fragment>
           ))}
           {selectionRect && (
             <Rect
