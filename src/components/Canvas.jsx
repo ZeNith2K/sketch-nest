@@ -8,6 +8,7 @@ import { useCanvasDraw } from '../hooks/useCanvasDraw';
 import { useCanvasDrawRect } from '../hooks/useCanvasDrawRect';
 import { useCanvasDrawEllipse } from '../hooks/useCanvasDrawEllipse';
 import { useCanvasSelect } from '../hooks/useCanvasSelect';
+import { useElementResize } from '../hooks/useElementResize';
 
 import ControlPanel from './ControlPanel';
 import SelectionContainer from './SelectionContainer';
@@ -18,6 +19,7 @@ const App = () => {
   const setIsMouseDown = useStore((state) => state.setIsMouseDown);
 
   const { handleWheel } = useCanvasZoom();
+  const { handleResize } = useElementResize();
   const { addCustomCursor, removeCustomCursor } = useCustomCursor();
   const { handleMouseDown: handlePanMouseDown, handleMouseUp: handlePanMouseUp, handleMouseMove: handlePanMouseMove } = useCanvasPan();
   const { handleMouseDown: handleDrawMouseDown, handleMouseMove: handleDrawMouseMove, handleMouseUp: handleDrawMouseUp } = useCanvasDraw();
@@ -93,11 +95,6 @@ const App = () => {
     handleDrawEllipseMouseUp(e)
     handleSelectMouseUp(e)
     handlePanMouseUp(e)
-  };
-
-  const handleResize = (newPos, direction) => {
-    // Implement resizing logic based on the direction
-    // Update the selected element's dimensions accordingly
   };
 
   return (
