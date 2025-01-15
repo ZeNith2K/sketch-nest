@@ -45,6 +45,8 @@ export const useCanvasSelect = () => {
       x: (pos.x - stageX) / stageScale,
       y: (pos.y - stageY) / stageScale,
     };
+
+    if (isInsideSelectedElement(transformedPos)) return;
     setSelectionRect((prevRect) => ({
       ...prevRect,
       width: transformedPos.x - prevRect.x,
@@ -54,9 +56,49 @@ export const useCanvasSelect = () => {
 
   const handleMouseUp = () => {
     if (!isSelecting || selectedTool !== 'selection') return;
-    const selectedLines = lines.map(line => ({ ...line, selected: isElementInSelection(line) }));
-    const selectedRects = rects.map(rect => ({ ...rect, selected: isElementInSelection(rect) }));
-    const selectedEllipses = ellipses.map(ellipse => ({ ...ellipse, selected: isElementInSelection(ellipse) }));
+    const pos = stage.getPointerPosition();
+    const transformedPos = {
+      x: (pos.x - stageX) / stageScale,
+      y: (pos.y - stageY) / stageScale,
+    };
+    if(isInsideSelectedElement(transformedPos)) return;
+
+    const offset = 2;
+
+    const selectedLines = lines.map(line => {
+      const selected = isElementInSelection(line);
+      const selectionRect = selected ? {
+      x: Math.min(...line.points.filter((_, index) => index % 2 === 0)) - offset,
+      y: Math.min(...line.points.filter((_, index) => index % 2 !== 0)) - offset,
+      width: Math.max(...line.points.filter((_, index) => index % 2 === 0)) - Math.min(...line.points.filter((_, index) => index % 2 === 0)) + 2 * offset,
+      height: Math.max(...line.points.filter((_, index) => index % 2 !== 0)) - Math.min(...line.points.filter((_, index) => index % 2 !== 0)) + 2 * offset,
+      } : null;
+
+      return { ...line, selected, selectionRect };
+    });
+
+    const selectedRects = rects.map(rect => {
+      const selected = isElementInSelection(rect);
+      const selectionRect = selected ? {
+        x: rect.x - offset,
+        y: rect.y - offset,
+        width: rect.width + 2 * offset,
+        height: rect.height + 2 * offset,
+      } : null;
+      return { ...rect, selected, selectionRect };
+    });
+
+    const selectedEllipses = ellipses.map(ellipse => {
+      const selected = isElementInSelection(ellipse);
+      const selectionRect = selected ? {
+        x: ellipse.x - ellipse.radiusX - offset,
+        y: ellipse.y - ellipse.radiusY - offset,
+        width: ellipse.radiusX * 2 + 2 * offset,
+        height: ellipse.radiusY * 2 + 2 * offset,
+      } : null;
+
+      return { ...ellipse, selected, selectionRect };
+    });
 
     setLines(selectedLines);
     setRects(selectedRects);
@@ -66,30 +108,30 @@ export const useCanvasSelect = () => {
     setSelectionRect(null);
   };
 
-  const isElementInSelection = (element, pos = null) => {
+  const isElementInSelection = (element) => {
+    if (!selectionRect) return false;
     const { x, y, width, height } = selectionRect;
     const elementX = element.x || element.points[0];
     const elementY = element.y || element.points[1];
-    const checkX = pos ? pos.x : elementX;
-    const checkY = pos ? pos.y : elementY;
     return (
-      checkX >= x &&
-      checkX <= x + width &&
-      checkY >= y &&
-      checkY <= y + height
+      elementX >= x &&
+      elementX <= x + width &&
+      elementY >= y &&
+      elementY <= y + height
     );
   };
 
   const isPointInElement = (element, point) => {
-    const elementX = element.x || element.points[0];
-    const elementY = element.y || element.points[1];
-    const elementWidth = element.width || (element.points && element.points[2] - element.points[0]) || 0;
-    const elementHeight = element.height || (element.points && element.points[3] - element.points[1]) || 0;
+    const offset = 8;
+    const elementX = element.selectionRect?.x
+    const elementY = element.selectionRect?.y
+    const elementWidth = element.selectionRect?.width
+    const elementHeight = element.selectionRect?.height
     return (
-      point.x >= elementX &&
-      point.x <= elementX + elementWidth &&
-      point.y >= elementY &&
-      point.y <= elementY + elementHeight
+      point.x >= elementX - offset &&
+      point.x <= elementX + elementWidth + offset &&
+      point.y >= elementY - offset &&
+      point.y <= elementY + elementHeight + offset
     );
   };
 

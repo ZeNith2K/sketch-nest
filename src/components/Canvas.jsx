@@ -128,13 +128,13 @@ const App = () => {
                 lineCap="round"
               />
               {line.selected && (
-                <Line
+                <SelectionContainer
                   key={`outline-${line.id}`}
-                  points={line.points}
-                  stroke="blue"
-                  strokeWidth={4}
-                  tension={0.5}
-                  lineCap="round"
+                  x={line.selectionRect.x}
+                  y={line.selectionRect.y}
+                  width={line.selectionRect.width}
+                  height={line.selectionRect.height}
+                  onResize={handleResize}
                 />
               )}
             </Fragment>
@@ -153,10 +153,10 @@ const App = () => {
               {rect.selected && (
                 <SelectionContainer
                   key={`outline-${rect.id}`}
-                  x={rect.x}
-                  y={rect.y}
-                  width={rect.width}
-                  height={rect.height}
+                  x={rect.selectionRect.x}
+                  y={rect.selectionRect.y}
+                  width={rect.selectionRect.width}
+                  height={rect.selectionRect.height}
                   onResize={handleResize}
                 />
               )}
@@ -176,10 +176,10 @@ const App = () => {
               {ellipse.selected && (
                 <SelectionContainer
                   key={`outline-${ellipse.id}`}
-                  x={ellipse.x - ellipse.radiusX}
-                  y={ellipse.y - ellipse.radiusY}
-                  width={ellipse.radiusX * 2}
-                  height={ellipse.radiusY * 2}
+                  x={ellipse.selectionRect.x}
+                  y={ellipse.selectionRect.y}
+                  width={ellipse.selectionRect.width}
+                  height={ellipse.selectionRect.height}
                   onResize={handleResize}
                 />
               )}
