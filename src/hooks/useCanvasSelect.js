@@ -31,9 +31,7 @@ export const useCanvasSelect = () => {
       y: (pos.y - stageY) / stageScale,
     };
 
-    // Check if the mouse is inside any of the selected elements
     if (isInsideSelectedElement(transformedPos)) return;
-
     setSelectionRect({ x: transformedPos.x, y: transformedPos.y, width: 0, height: 0 });
     setIsSelecting(true);
   };

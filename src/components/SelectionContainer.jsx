@@ -1,14 +1,8 @@
 import { Rect, Circle } from 'react-konva';
 import { useStore } from '../store';
 
-const SelectionContainer = ({ x, y, width, height, onResize }) => {
-
+const SelectionContainer = ({ x, y, width, height }) => {
   const stage = useStore((state) => state.stage);
-
-  const handleDragMove = (e, direction) => {
-    const newPos = e.target.getStage().getPointerPosition();
-    onResize(newPos, direction);
-  };
 
   const resizeNodes = [
     { x: x - 8, y: y - 8, direction: 'top-left' },
@@ -81,8 +75,6 @@ const SelectionContainer = ({ x, y, width, height, onResize }) => {
           fill="white"
           stroke="rgba(0, 0, 255, 0.5)"
           strokeWidth={1}
-          draggable
-          onDragMove={(e) => handleDragMove(e, node.direction)}
         />
       ))}
     </>
