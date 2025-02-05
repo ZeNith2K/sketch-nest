@@ -8,9 +8,9 @@ import { useCanvasDraw } from '../hooks/useCanvasDraw';
 import { useCanvasDrawRect } from '../hooks/useCanvasDrawRect';
 import { useCanvasDrawEllipse } from '../hooks/useCanvasDrawEllipse';
 import { useCanvasSelect } from '../hooks/useCanvasSelect';
-import { useElementResize } from '../hooks/useElementResize';
 
-import ControlPanel from './ControlPanel';
+import Toolbox from './Toolbox';
+import CanvasControls from './CanvasControls';
 import SelectionContainer from './SelectionContainer';
 
 const App = () => {
@@ -19,7 +19,6 @@ const App = () => {
   const setIsMouseDown = useStore((state) => state.setIsMouseDown);
 
   const { handleWheel } = useCanvasZoom();
-  const { handleResize } = useElementResize();
   const { addCustomCursor, removeCustomCursor } = useCustomCursor();
   const { handleMouseDown: handlePanMouseDown, handleMouseUp: handlePanMouseUp, handleMouseMove: handlePanMouseMove } = useCanvasPan();
   const { handleMouseDown: handleDrawMouseDown, handleMouseMove: handleDrawMouseMove, handleMouseUp: handleDrawMouseUp } = useCanvasDraw();
@@ -99,7 +98,8 @@ const App = () => {
 
   return (
     <div className="relative w-screen">
-      <ControlPanel />
+      <Toolbox />
+      <CanvasControls />
       <Stage
         width={window.innerWidth}
         height={window.innerHeight}
@@ -134,7 +134,7 @@ const App = () => {
                   y={line.selectionRect.y}
                   width={line.selectionRect.width}
                   height={line.selectionRect.height}
-                  onResize={handleResize}
+                  element={line}
                 />
               )}
             </Fragment>
@@ -157,7 +157,7 @@ const App = () => {
                   y={rect.selectionRect.y}
                   width={rect.selectionRect.width}
                   height={rect.selectionRect.height}
-                  onResize={handleResize}
+                  element={rect}
                 />
               )}
             </Fragment>
@@ -180,7 +180,7 @@ const App = () => {
                   y={ellipse.selectionRect.y}
                   width={ellipse.selectionRect.width}
                   height={ellipse.selectionRect.height}
-                  onResize={handleResize}
+                  element={ellipse}
                 />
               )}
             </Fragment>
@@ -197,7 +197,6 @@ const App = () => {
           )}
         </Layer>
       </Stage>
-      <div id="circle" className="box"></div>
     </div>
   );
 };
