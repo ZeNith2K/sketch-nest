@@ -8,6 +8,7 @@ const SelectionContainer = ({ x, y, width, height, element }) => {
     handleDragStart,
     handleDragMove,
     handleDragEnd,
+    isResizing
   } = useElementResize(x, y, width, height, element);
 
   return (
@@ -25,6 +26,10 @@ const SelectionContainer = ({ x, y, width, height, element }) => {
         onDragEnd={handleDragEnd}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        dragBoundFunc={(pos) => {
+          if (isResizing) return { x: x-8, y: y-8 }; // Prevent movement when resizing
+          return pos; // Allow normal dragging
+        }}
       />
     </>
   );
