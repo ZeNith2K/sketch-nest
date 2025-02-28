@@ -1,5 +1,5 @@
 import { useEffect, useRef, Fragment } from 'react';
-import { Stage, Layer, Line, Ellipse, Rect, Circle } from 'react-konva';
+import { Stage, Layer, Line, Ellipse, Rect, Circle, Image } from 'react-konva';
 import { useStore } from '../store';
 import { useCanvasZoom } from '../hooks/useCanvasZoom';
 import { useCustomCursor } from '../hooks/useCustomCursor';
@@ -37,6 +37,7 @@ const App = () => {
   const setRects = useStore((state) => state.setRects);
   const setEllipses = useStore((state) => state.setEllipses);
   const selectedTool = useStore((state) => state.selectedTool);
+  const images = useStore((state) => state.images);
 
   const removeElements = () => {
     if(selectedTool !== 'eraser') return
@@ -184,6 +185,18 @@ const App = () => {
                 />
               )}
             </Fragment>
+          ))}
+          {images.map(image => (
+            <Image
+              key={image.id}
+              id={image.id}
+              image={image.src}
+              x={image.x}
+              y={image.y}
+              width={image.width/2}
+              height={image.height/2}
+              draggable
+            />
           ))}
           {selectionRect && (
             <Rect

@@ -6,21 +6,30 @@ export const useCanvasZoom = () => {
   const setStageY = useStore((state) => state.setStageY);
   const stage = useStore((state) => state.stage);
 
+  let scaleBy = 1.1;
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
-    const scaleBy = 1.05;
+    scaleBy = 1.05
+    zoomCanvas(e.evt.deltaY > 0 ? scaleBy : 1 / scaleBy);
+  };
+
+  const zoomCanvas = (zoomFactor) => {
+    if (!stage) return;
     const oldScale = stage.scaleX();
     const mousePointTo = {
       x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
       y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
     };
 
-    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const newScale = oldScale * zoomFactor;
     setStageScale(newScale);
     setStageX(-(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale);
     setStageY(-(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale);
   };
 
-  return { handleWheel };
+  const zoomIn = () => zoomCanvas(scaleBy);
+  const zoomOut = () => zoomCanvas(1 / scaleBy);
+
+  return { handleWheel, zoomIn, zoomOut, zoomLevel: (Math.round(stage?.scaleX() * 100)) || 100 };
 };

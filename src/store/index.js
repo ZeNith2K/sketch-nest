@@ -12,6 +12,7 @@ export const useStore = create((set) => ({
   ellipses: [],
   rects: [],
   history: [],
+  images: [],
   historyIndex: -1,
   setStage: (stage) => set({ stage }),
   setStageScale: (stageScale) => set({ stageScale }),
@@ -23,6 +24,7 @@ export const useStore = create((set) => ({
   setLines: (lines) => set({ lines }),
   setEllipses: (ellipses) => set({ ellipses }),
   setRects: (rects) => set({ rects }),
+  setImages: (images) => set({ images }),
   addHistory: (newState) => set((state) => {
     const lastHistory = state.history[state.historyIndex];
     let tempHistory = [...state.history]
