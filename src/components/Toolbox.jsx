@@ -1,7 +1,7 @@
-import { Square, Circle, PencilSimple, Eraser, HandPalm, Selection, Image } from '@phosphor-icons/react';
-import { useStore } from '../store';
 import { useRef } from 'react';
+import { Square, Circle, PencilSimple, Eraser, HandPalm, Selection, Image } from '@phosphor-icons/react';
 
+import { useStore } from '../store';
 import { useImageUpload } from '../hooks/useImageUpload';
 
 const Toolbox = () => {
@@ -19,10 +19,7 @@ const Toolbox = () => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      console.log('file is being uploaded');
-      handleImageUpload(file);
-    }
+    if (file) handleImageUpload(file);
   };
 
   return (

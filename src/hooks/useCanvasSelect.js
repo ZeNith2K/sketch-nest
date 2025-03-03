@@ -13,6 +13,8 @@ export const useCanvasSelect = () => {
   const setRects = useStore((state) => state.setRects);
   const setEllipses = useStore((state) => state.setEllipses);
   const selectedTool = useStore((state) => state.selectedTool);
+  const images = useStore((state) => state.images);
+  const setImages = useStore((state) => state.setImages);
 
   const [selectionRect, setSelectionRect] = useState(null);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -97,6 +99,20 @@ export const useCanvasSelect = () => {
 
       return { ...ellipse, selected, selectionRect };
     });
+
+    const selectedImages = images.map(image => {
+      const selected = isElementInSelection(image);
+      const selectionRect = selected ? {
+        x: image.x - offset,
+        y: image.y - offset,
+        width: image.width + 2 * offset,
+        height: image.height + 2 * offset,
+      } : null;
+
+      return { ...image, selected, selectionRect };
+    });
+
+    setImages(selectedImages);
 
     setLines(selectedLines);
     setRects(selectedRects);

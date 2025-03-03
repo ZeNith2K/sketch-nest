@@ -187,16 +187,28 @@ const App = () => {
             </Fragment>
           ))}
           {images.map(image => (
-            <Image
-              key={image.id}
-              id={image.id}
-              image={image.src}
-              x={image.x}
-              y={image.y}
-              width={image.width/2}
-              height={image.height/2}
-              draggable
-            />
+            <Fragment key={`Fragment-${image.id}`}>
+              <Image
+                key={image.id}
+                id={image.id}
+                image={image.src}
+                x={image.x}
+                y={image.y}
+                width={image.width}
+                height={image.height}
+              />
+              {image.selected && (
+                <SelectionContainer
+                  key={`outline-${image.id}`}
+                  x={image.selectionRect.x}
+                  y={image.selectionRect.y}
+                  width={image.selectionRect.width}
+                  height={image.selectionRect.height}
+                  element={image}
+                />
+              )}
+            </Fragment>
+
           ))}
           {selectionRect && (
             <Rect

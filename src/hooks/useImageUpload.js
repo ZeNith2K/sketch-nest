@@ -5,19 +5,21 @@ export const useImageUpload = () => {
   const images = useStore((state) => state.images);
 
   const handleImageUpload = (file) => {
-    console.log('file', file)
     const reader = new FileReader();
     reader.onload = (event) => {
       const image = new window.Image();
       image.src = event.target.result;
       image.onload = () => {
+        const fixedWidth = 400;
+        const aspectRatio = image.width / image.height;
+        const calculatedHeight = fixedWidth / aspectRatio; // Maintain aspect ratio
         const newImage = {
           id: `image-${Date.now()}`,
           src: image,
           x: 50,
           y: 50,
-          width: image.width/2,
-          height: image.height/2,
+          width: fixedWidth,
+          height: calculatedHeight,
         };
         setImages([...images, newImage]);
       };
